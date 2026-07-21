@@ -35,8 +35,8 @@ jobs:
   backend:
     runs-on: ubuntu-latest
     env:
-      SECRET_KEY: ci-secret-key
-      JWT_SECRET_KEY: ci-jwt-secret
+      SECRET_KEY: ci-secret-key-with-at-least-thirty-two-bytes
+      JWT_SECRET_KEY: ci-jwt-secret-with-at-least-thirty-two-bytes
       GROQ_API_KEY: ci-placeholder
       FRONTEND_URL: http://localhost:3000
     steps:
@@ -57,6 +57,9 @@ jobs:
 
       - name: Smoke test gateway app factory
         run: python -c "from gateway.app import create_app; app = create_app(); print(app.name)"
+
+      - name: Run gateway API integration smoke test
+        run: python -m unittest discover -s tests/integration -p "test_*.py"
 
       - name: Smoke test workout model loading
         run: python -c "from services.muscle_ai_service.core.models.yolo import get_yolo_models; models = get_yolo_models(); print(sorted(models.keys()))"

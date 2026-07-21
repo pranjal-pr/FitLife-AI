@@ -1,12 +1,14 @@
+const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/$/, '');
+
 export const site = {
   name: 'FitLife',
   title: 'FitLife - AI Fitness and Nutrition Coach',
   description:
     'FitLife is a full-stack wellness app that combines OCR nutrition scans, pose-based workout feedback, and an AI coach into one daily training workflow.',
-  contactEmail: 'hello@fitlife.app',
+  contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'hello@example.com',
   backend: {
-    appUrl: 'https://shinzobolte-fitlife-ai.hf.space',
-    settingsUrl: 'https://huggingface.co/spaces/shinzobolte/fitlife-ai/settings',
+    appUrl: apiUrl,
+    settingsUrl: process.env.NEXT_PUBLIC_BACKEND_SETTINGS_URL || '',
   },
 };
 

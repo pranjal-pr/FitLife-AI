@@ -13,10 +13,11 @@
 
 ---
 
-## Live Demo
+## Maintained Version
 
-- Frontend: `https://fit-life-ai-1eqx.vercel.app`
-- Backend API: `https://shinzobolte-fitlife-ai.hf.space`
+This repository is maintained by [pranjal-pr](https://github.com/pranjal-pr) and is configured for an independent deployment. It is based on the original [FitLife-AI project](https://github.com/shinzoxD/FitLife-AI) by Nishchay Sharma (`shinzoxD`). See [License](#license) for reuse terms and attribution.
+
+Deployment URLs are intentionally supplied through environment variables instead of pointing at the upstream author's services.
 
 ---
 
@@ -28,7 +29,7 @@ FitLife is a full-stack fitness product with three core surfaces:
 - **Form Coach** - upload a workout clip and receive rep counting, movement scoring, and coaching cues powered by YOLO pose checkpoints.
 - **FitLife Coach** - ask nutrition and recovery questions through a profile-aware AI assistant.
 
-This repo is deployed with:
+The supported deployment architecture uses:
 
 - `Vercel` for the Next.js frontend
 - `Hugging Face Spaces (Docker)` for the Flask backend
@@ -79,7 +80,7 @@ fitlife/
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/shinzoxD/FitLife-AI.git
+git clone https://github.com/pranjal-pr/FitLife-AI.git
 cd FitLife-AI
 ```
 
@@ -238,7 +239,7 @@ Use the template in [`docs/HUGGINGFACE_SPACE_README.md`](docs/HUGGINGFACE_SPACE_
 - Keep the existing root directory from [`vercel.json`](vercel.json):
   - `frontend`
 - Set:
-  - `NEXT_PUBLIC_API_URL=https://shinzobolte-fitlife-ai.hf.space`
+  - `NEXT_PUBLIC_API_URL=https://<your-space>.hf.space`
 
 #### 3. Final wiring
 
@@ -276,7 +277,7 @@ For the Hugging Face Space deployment job:
 Example `HF_SPACE_REPO` value:
 
 ```text
-shinzobolte/fitlife-ai
+your-hugging-face-user/fitlife-ai
 ```
 
 ### How the pipeline works
@@ -301,9 +302,10 @@ Use [`docs/RESUME_PROJECT.md`](docs/RESUME_PROJECT.md) for resume bullets, a por
 - Ultralytics YOLOv8 for pose estimation
 - Groq for nutrition OCR and text inference
 - Harvard Medical School nutrition research used in the knowledge base
+- Nishchay Sharma (`shinzoxD`) for the original FitLife-AI project and commit history
 
 ---
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the [MIT License](LICENSE). The original copyright and license notice are retained as required by that license.
