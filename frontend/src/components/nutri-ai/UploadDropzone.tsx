@@ -2,7 +2,7 @@
 
 import { useState, useRef, type DragEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { apiFetch } from '@/lib/api';
+import { analyzeNutrition, type NutritionAnalysis } from '@/lib/gradio';
 import { useAuth } from '@/lib/auth';
 import { getPreferredNutritionProfile, saveNutritionProfile } from '@/lib/nutri-profile';
 import Button from '@/components/ui/Button';
@@ -18,7 +18,7 @@ export default function UploadDropzone() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const [step, setStep] = useState<'upload' | 'extracted'>('upload');
-  const [nutritionData, setNutritionData] = useState<Record<string, number> | null>(null);
+  const [analysis, setAnalysis] = useState<NutritionAnalysis | null>(null);
 
   function handleFile(nextFile: File) {
     if (!nextFile.type.startsWith('image/')) {
@@ -29,7 +29,7 @@ export default function UploadDropzone() {
     setError('');
     setPreview(URL.createObjectURL(nextFile));
     setStep('upload');
-    setNutritionData(null);
+    setAnalysis(null);
   }
 
   function onDrop(event: DragEvent) {
@@ -43,10 +43,10 @@ export default function UploadDropzone() {
     setUploading(true);
     setError('');
     try {
-      const body = new FormData();
-      body.append('image', file);
-      const result = await apiFetch<{ nutrition_info: Record<string, number> }>('/nutri-ai/upload', { method: 'POST', body });
-      setNutritionData(result.nutrition_info);
+      const userProfile = getPreferredNutritionProfile(user);
+      saveNutritionProfile(userProfile);
+      const result = await analyzeNutrition(file, userProfile);
+      setAnalysis(result);
       setStep('extracted');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Upload failed';
@@ -57,22 +57,11 @@ export default function UploadDropzone() {
   }
 
   async function handleAnalyze() {
-    if (!nutritionData) return;
+    if (!analysis) return;
     setUploading(true);
     setError('');
     try {
-      const userProfile = getPreferredNutritionProfile(user);
-      saveNutritionProfile(userProfile);
-      const derivedProductName = file?.name?.replace(/\.[^.]+$/, '') || 'Fuel Scan';
-      const result = await apiFetch('/nutri-ai/analyze', {
-        method: 'POST',
-        body: JSON.stringify({
-          nutrition_info: nutritionData,
-          user_profile: userProfile,
-          product_name: derivedProductName,
-        }),
-      });
-      sessionStorage.setItem('nutri_result', JSON.stringify(result));
+      sessionStorage.setItem('nutri_result', JSON.stringify(analysis));
       router.push('/nutri-ai/results');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Analysis failed';
@@ -125,15 +114,15 @@ export default function UploadDropzone() {
         </Button>
       )}
 
-      {step === 'extracted' && nutritionData && (
+      {step === 'extracted' && analysis && (
         <div className="space-y-4">
           <div className="rounded-xl border border-border bg-bg-secondary p-6">
             <h3 className="mb-4 text-lg font-semibold">Extracted Nutrition Facts</h3>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {Object.entries(nutritionData).map(([key, value]) => (
+              {Object.entries(analysis.nutrition).map(([key, value]) => (
                 <div key={key} className="rounded-lg bg-bg-tertiary p-3 text-center">
                   <div className="text-xs capitalize text-text-tertiary">{key.replace(/_/g, ' ')}</div>
-                  <div className="text-lg font-bold">{value}</div>
+                  <div className="text-lg font-bold">{String(value)}</div>
                 </div>
               ))}
             </div>

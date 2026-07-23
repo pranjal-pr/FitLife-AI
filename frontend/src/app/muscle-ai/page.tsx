@@ -1,56 +1,29 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { apiFetch } from '@/lib/api';
-import { usePolling } from '@/hooks/usePolling';
-import type { MuscleAnalysisResult, MuscleTaskStatus } from '@/lib/types';
+import { useState } from 'react';
+import { analyzeWorkout } from '@/lib/gradio';
+import type { MuscleAnalysisResult } from '@/lib/types';
 import ExerciseSelect from '@/components/muscle-ai/ExerciseSelect';
 import VideoUpload from '@/components/muscle-ai/VideoUpload';
 import AnalysisResults from '@/components/muscle-ai/AnalysisResults';
 import Button from '@/components/ui/Button';
 import Alert from '@/components/ui/Alert';
 
-type UploadResponse = Partial<MuscleAnalysisResult> & {
-  task_id?: string;
-};
-
 export default function MuscleAIPage() {
   const [exercise, setExercise] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
-  const [taskId, setTaskId] = useState('');
-  const [syncResult, setSyncResult] = useState<MuscleAnalysisResult | null>(null);
-
-  const fetcher = useCallback(
-    () => apiFetch<MuscleTaskStatus>(`/muscle-ai/task/${taskId}`),
-    [taskId],
-  );
-
-  const { data: taskData, polling, start: startPolling } = usePolling(
-    fetcher,
-    (data) => data.status === 'completed' || data.status === 'failed',
-    3000,
-  );
+  const [result, setResult] = useState<MuscleAnalysisResult | null>(null);
 
   async function handleUpload() {
     if (!file || !exercise) return;
     setUploading(true);
     setError('');
-    setSyncResult(null);
-
-    const body = new FormData();
-    body.append('video', file);
-    body.append('exercise_type', exercise);
+    setResult(null);
 
     try {
-      const result = await apiFetch<UploadResponse>('/muscle-ai/upload', { method: 'POST', body });
-      if (result.task_id) {
-        setTaskId(result.task_id);
-        setTimeout(() => startPolling(), 500);
-      } else {
-        setSyncResult(result as MuscleAnalysisResult);
-      }
+      setResult(await analyzeWorkout(file, exercise));
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Upload failed');
     } finally {
@@ -58,8 +31,7 @@ export default function MuscleAIPage() {
     }
   }
 
-  const isComplete = taskData?.status === 'completed' || syncResult;
-  const resultData = syncResult || taskData?.result;
+  const isComplete = Boolean(result);
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-16">
@@ -90,32 +62,31 @@ export default function MuscleAIPage() {
       {!isComplete && (
         <Button
           onClick={handleUpload}
-          loading={uploading || polling}
+          loading={uploading}
           disabled={!exercise || !file}
           size="lg"
           className="w-full"
         >
-          {polling ? 'Analyzing movement...' : 'Generate Coaching Report'}
+          {uploading ? 'Analyzing movement...' : 'Generate Coaching Report'}
         </Button>
       )}
 
-      {polling && !isComplete && (
+      {uploading && !isComplete && (
         <div className="mt-6 flex flex-col items-center text-center">
           <div className="mb-3 h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
           <p className="text-sm text-text-secondary">Processing your set. This can take up to a minute for longer clips.</p>
         </div>
       )}
 
-      {isComplete && resultData && (
+      {isComplete && result && (
         <div className="mt-8">
           <h2 className="mb-4 font-semibold">Coaching Report</h2>
-          <AnalysisResults data={resultData} />
+          <AnalysisResults data={result} />
           <Button
             variant="secondary"
             className="mt-6 w-full"
             onClick={() => {
-              setTaskId('');
-              setSyncResult(null);
+              setResult(null);
               setFile(null);
               setExercise('');
             }}
@@ -125,11 +96,6 @@ export default function MuscleAIPage() {
         </div>
       )}
 
-      {taskData?.status === 'failed' && (
-        <Alert variant="error" className="mt-6">
-          Analysis failed. {taskData.error || 'Please try again.'}
-        </Alert>
-      )}
     </div>
   );
 }

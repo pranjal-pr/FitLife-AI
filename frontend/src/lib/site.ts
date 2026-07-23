@@ -1,4 +1,7 @@
-const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/$/, '');
+const backendAppUrl = (
+  process.env.NEXT_PUBLIC_HF_SPACE_URL ||
+  'https://praanjalpradhan-ai-fit-pro.hf.space'
+).replace(/\/$/, '');
 
 export const site = {
   name: 'FitLife',
@@ -7,7 +10,7 @@ export const site = {
     'FitLife is a full-stack wellness app that combines OCR nutrition scans, pose-based workout feedback, and an AI coach into one daily training workflow.',
   contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'hello@example.com',
   backend: {
-    appUrl: apiUrl,
+    appUrl: backendAppUrl,
     settingsUrl: process.env.NEXT_PUBLIC_BACKEND_SETTINGS_URL || '',
   },
 };

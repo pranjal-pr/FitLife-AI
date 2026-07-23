@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { apiFetch } from '@/lib/api';
+import { askCoach } from '@/lib/gradio';
 import type { ChatMessage as ChatMsg } from '@/lib/types';
 import ChatMessage from '@/components/ana/ChatMessage';
 import ChatInput from '@/components/ana/ChatInput';
@@ -28,14 +28,8 @@ export default function AnaPage() {
     setSending(true);
 
     try {
-      const res = await apiFetch<{ reply: string }>('/ana/chat', {
-        method: 'POST',
-        body: JSON.stringify({
-          message: msg,
-          history: updated.slice(-10),
-        }),
-      });
-      setMessages((prev) => [...prev, { role: 'assistant', content: res.reply }]);
+      const reply = await askCoach(msg);
+      setMessages((prev) => [...prev, { role: 'assistant', content: reply }]);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       setMessages((prev) => [
