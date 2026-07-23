@@ -4,7 +4,7 @@ const features = [
   { title: 'Studio Dashboards', desc: 'Centralize member check-ins, scan activity, and workout feedback for coaching teams.' },
   { title: 'Dedicated Infrastructure', desc: 'Spin up isolated environments for gyms, wellness programs, or internal pilots.' },
   { title: 'SSO and Compliance', desc: 'Support team onboarding, access controls, and production-style deployment requirements.' },
-  { title: 'Priority Support', desc: 'Use FitLife as a white-glove pilot with faster issue triage and roadmap feedback loops.' },
+  { title: 'Priority Support', desc: 'Use AI Fit Pro as a white-glove pilot with faster issue triage and roadmap feedback loops.' },
   { title: 'White-Label Launches', desc: 'Adapt the app for coach brands, gym memberships, or internal health initiatives.' },
   { title: 'Unlimited API Access', desc: 'Plug nutrition and form analysis into broader products without demo-tier limits.' },
 ];
@@ -13,7 +13,7 @@ export default function EnterprisePage() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-24">
       <div className="mb-16 text-center">
-        <h1 className="font-display text-4xl font-bold">FitLife for coaches, gyms, and teams</h1>
+        <h1 className="font-display text-4xl font-bold">AI Fit Pro for coaches, gyms, and teams</h1>
         <p className="mx-auto mt-4 max-w-2xl text-text-secondary">
           The same product surface can be adapted for team rollouts, wellness programs, and white-label pilots.
         </p>

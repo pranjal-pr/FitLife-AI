@@ -1,4 +1,4 @@
-# FitLife API Gateway - Lightweight Deployment Dependencies
+# AI Fit Pro API Gateway - Lightweight Deployment Dependencies
 # Gateway-only deps for Koyeb, Render, or other simple Python hosts
 
 Flask>=3.0.0

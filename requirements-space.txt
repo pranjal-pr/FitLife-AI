@@ -1,4 +1,4 @@
-# FitLife backend dependencies for Hugging Face Spaces / Docker deployment
+# AI Fit Pro backend dependencies for Hugging Face Spaces / Docker deployment
 
 Flask>=3.0.0
 Flask-Cors>=4.0.0

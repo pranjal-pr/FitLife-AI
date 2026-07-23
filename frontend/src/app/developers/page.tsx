@@ -17,7 +17,7 @@ const endpoints = [
   { method: 'GET', path: '/api/v1/muscle-ai/exercises', desc: 'List supported workout types' },
   { method: 'POST', path: '/api/v1/muscle-ai/upload', desc: 'Upload workout video' },
   { method: 'GET', path: '/api/v1/muscle-ai/task/:id', desc: 'Poll workout task status' },
-  { method: 'POST', path: '/api/v1/ana/chat', desc: 'Chat with FitLife Coach' },
+  { method: 'POST', path: '/api/v1/ana/chat', desc: 'Chat with AI Fit Pro Coach' },
 ];
 
 export default function DevelopersPage() {
@@ -25,9 +25,9 @@ export default function DevelopersPage() {
     <div className="mx-auto max-w-5xl px-6 py-24">
       <div className="mb-16 text-center">
         <span className="mb-4 inline-block rounded-full border border-accent/30 bg-accent-glow px-3 py-1 text-xs font-semibold text-accent">Build</span>
-        <h1 className="font-display text-4xl font-bold">FitLife Architecture</h1>
+        <h1 className="font-display text-4xl font-bold">AI Fit Pro Architecture</h1>
         <p className="mx-auto mt-4 max-w-2xl text-text-secondary">
-          FitLife uses a product-style architecture: a Next.js frontend, Flask gateway, AI services, and a shared data layer that keeps nutrition, workouts, and coaching connected.
+          AI Fit Pro uses a product-style architecture: a Next.js frontend, Flask gateway, AI services, and a shared data layer that keeps nutrition, workouts, and coaching connected.
         </p>
       </div>
 
@@ -45,7 +45,7 @@ export default function DevelopersPage() {
       <section>
         <h2 className="mb-2 font-display text-2xl font-bold">Current API Routes</h2>
         <p className="mb-6 max-w-3xl text-sm leading-relaxed text-text-secondary">
-          These are the main live routes exposed by the FitLife gateway and used by the frontend for auth, profile persistence, nutrition scoring, workout analysis, and coach chat.
+          These are the main live routes exposed by the AI Fit Pro gateway and used by the frontend for auth, profile persistence, nutrition scoring, workout analysis, and coach chat.
         </p>
         <div className="overflow-hidden rounded-xl border border-border">
           <table className="w-full text-sm">

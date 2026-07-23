@@ -33,7 +33,7 @@ export default function DashboardPage() {
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-display text-2xl font-bold">Welcome back, {user.name}</h1>
-          <p className="mt-1 text-text-secondary">Here is your FitLife performance snapshot.</p>
+          <p className="mt-1 text-text-secondary">Here is your AI Fit Pro performance snapshot.</p>
         </div>
         <Link
           href="/dashboard/settings"
@@ -88,7 +88,7 @@ export default function DashboardPage() {
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 3z" /></svg>
           </div>
-          <h3 className="font-semibold">FitLife Coach</h3>
+          <h3 className="font-semibold">AI Fit Pro Coach</h3>
           <p className="mt-1 text-sm text-text-secondary">Ask for meals and recovery advice</p>
         </Link>
       </div>

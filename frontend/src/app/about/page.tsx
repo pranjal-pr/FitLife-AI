@@ -11,7 +11,7 @@ const experiences = [
     desc: 'Pose-analysis workflow that scores lifts, counts reps, and flags coaching cues.',
   },
   {
-    title: 'FitLife Coach',
+    title: 'AI Fit Pro Coach',
     desc: 'A nutrition-aware assistant grounded in curated meal and recovery guidance.',
   },
 ];
@@ -20,9 +20,9 @@ export default function AboutPage() {
   return (
     <div className="mx-auto max-w-4xl px-6 py-24">
       <div className="mb-16 text-center">
-        <h1 className="font-display text-4xl font-bold">About FitLife</h1>
+        <h1 className="font-display text-4xl font-bold">About AI Fit Pro</h1>
         <p className="mx-auto mt-4 max-w-2xl text-text-secondary">
-          FitLife is a portfolio-first wellness product concept built to show full-stack execution, AI feature integration, and polished UX in one app.
+          AI Fit Pro is a portfolio-first wellness product concept built to show full-stack execution, AI feature integration, and polished UX in one app.
         </p>
       </div>
 
@@ -30,7 +30,7 @@ export default function AboutPage() {
         <section>
           <h2 className="mb-4 font-display text-2xl font-bold text-text-primary">Product Thesis</h2>
           <p>
-            Most health apps treat nutrition, training, and coaching as separate products. FitLife brings them together so a user can scan food, review lifting mechanics, and ask for meal guidance without context switching.
+            Most health apps treat nutrition, training, and coaching as separate products. AI Fit Pro brings them together so a user can scan food, review lifting mechanics, and ask for meal guidance without context switching.
           </p>
         </section>
 

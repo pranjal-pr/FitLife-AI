@@ -16,7 +16,7 @@ export default function ContactPage() {
   return (
     <div className="mx-auto max-w-2xl px-6 py-24">
       <div className="mb-12 text-center">
-        <h1 className="font-display text-4xl font-bold">Contact FitLife</h1>
+        <h1 className="font-display text-4xl font-bold">Contact AI Fit Pro</h1>
         <p className="mt-4 text-text-secondary">
           Use this page for feedback, feature ideas, hiring conversations, or a walkthrough request.
         </p>

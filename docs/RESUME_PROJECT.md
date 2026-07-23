@@ -1,26 +1,26 @@
-# FitLife Resume Notes
+# AI Fit Pro Resume Notes
 
 ## One-Line Summary
 
-FitLife is a deployed full-stack AI fitness app that combines nutrition-label OCR, pose-based workout analysis, and an AI meal coach in one product workflow.
+AI Fit Pro is a deployed full-stack AI fitness app that combines nutrition-label OCR, pose-based workout analysis, and an AI meal coach in one product workflow.
 
 ## Resume Bullets
 
-- Built `FitLife`, a full-stack wellness application using Next.js 15, React 19, Flask, and JWT auth, with integrated nutrition scanning, workout analysis, and AI coaching workflows.
+- Built `AI Fit Pro`, a full-stack wellness application using Next.js 15, React 19, Flask, and JWT auth, with integrated nutrition scanning, workout analysis, and AI coaching workflows.
 - Implemented an OCR-driven nutrition pipeline and a retrieval-backed meal coach that turned user profile data and food inputs into personalized scoring and guidance.
 - Deployed the product on `Vercel` and `Hugging Face Spaces`, integrated custom YOLO checkpoints for exercise analysis, and shipped a portfolio-ready UX with real API-backed flows.
 
 ## Portfolio Description
 
-FitLife is a polished full-stack portfolio project that demonstrates frontend design, API integration, authentication, OCR, computer-vision-based workout analysis, and live cloud deployment in a single repo.
+AI Fit Pro is a polished full-stack portfolio project that demonstrates frontend design, API integration, authentication, OCR, computer-vision-based workout analysis, and live cloud deployment in a single repo.
 
 ## GitHub Description
 
-FitLife is a full-stack AI fitness app built with Next.js, Flask, OCR nutrition analysis, pose-based workout scoring, and live cloud deployment.
+AI Fit Pro is a full-stack AI fitness app built with Next.js, Flask, OCR nutrition analysis, pose-based workout scoring, and live cloud deployment.
 
 ## Portfolio Card Text
 
-FitLife combines nutrition-label OCR, workout-form analysis, and AI coaching into one deployed full-stack product.
+AI Fit Pro combines nutrition-label OCR, workout-form analysis, and AI coaching into one deployed full-stack product.
 
 ## Interview Talking Points
 

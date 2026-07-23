@@ -1,5 +1,5 @@
 ---
-title: FitLife AI API
+title: AI Fit Pro API
 emoji: "💪"
 colorFrom: blue
 colorTo: green
@@ -10,9 +10,9 @@ license: mit
 short_description: AI fitness and nutrition backend API
 ---
 
-# FitLife AI API
+# AI Fit Pro API
 
-This Space runs the Flask backend for FitLife and is maintained by
+This Space runs the Flask backend for AI Fit Pro and is maintained by
 [pranjal-pr](https://github.com/pranjal-pr).
 
 It is based on the original

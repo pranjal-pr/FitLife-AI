@@ -33,7 +33,7 @@ export default function LoginPage() {
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-6 py-16">
       <h1 className="font-display text-3xl font-bold text-center">Welcome back</h1>
-      <p className="mt-2 text-center text-text-secondary">Sign in to your FitLife account</p>
+      <p className="mt-2 text-center text-text-secondary">Sign in to your AI Fit Pro account</p>
 
       {error && <Alert variant="error" className="mt-6">{error}</Alert>}
 

@@ -1,5 +1,5 @@
 """
-Ana - RAG-based nutrition and recovery assistant for FitLife.
+Ana - RAG-based nutrition and recovery assistant for AI Fit Pro.
 """
 
 import json
@@ -200,7 +200,7 @@ def _build_profile_block(user_profile: Optional[Dict]) -> str:
 
 def _build_meal_plan_system_prompt() -> str:
     return (
-        "You are Ana, FitLife's friendly nutrition assistant. "
+        "You are Ana, AI Fit Pro's friendly nutrition assistant. "
         "You are an expert dietitian trained on the Harvard Medical School "
         "Guide to Healthy Eating. Your job is to take the ingredients a user "
         "has available and suggest a practical, healthy diet plan they can "
@@ -219,7 +219,7 @@ def _build_meal_plan_system_prompt() -> str:
 
 def _build_general_system_prompt() -> str:
     return (
-        "You are Ana, FitLife's friendly nutrition and recovery assistant. "
+        "You are Ana, AI Fit Pro's friendly nutrition and recovery assistant. "
         "Answer the user's latest question directly and naturally.\n\n"
         "Guidelines:\n"
         "- Do not default to a full meal plan unless the user explicitly asks for one.\n"
@@ -381,7 +381,7 @@ def _smalltalk_reply(user_profile: Optional[Dict] = None) -> str:
     name = (user_profile or {}).get("name")
     greeting = f"Hi {name}," if name else "Hi,"
     return (
-        f"{greeting} I'm FitLife Coach. I can help with meals, macros, ingredients, "
+        f"{greeting} I'm AI Fit Pro Coach. I can help with meals, macros, ingredients, "
         "recovery nutrition, and food-label questions. Tell me what you want help with."
     )
 

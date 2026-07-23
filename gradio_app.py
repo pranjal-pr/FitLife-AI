@@ -1,5 +1,5 @@
 """
-Native Hugging Face Gradio interface for the FitLife AI features.
+Native Hugging Face Gradio interface for the AI Fit Pro features.
 
 The full product uses a Next.js frontend and Flask API. This module provides a
 Space-friendly demo that runs the nutrition, coaching, and workout pipelines
@@ -243,7 +243,7 @@ def analyze_workout(
 
 def build_demo() -> gr.Blocks:
     with gr.Blocks(
-        title="FitLife AI",
+        title="AI Fit Pro",
         delete_cache=(3600, 3600),
     ) as demo:
         gr.HTML(
@@ -367,7 +367,7 @@ def build_demo() -> gr.Blocks:
                 api_name="analyze_workout",
             )
 
-        with gr.Tab("FitLife Coach"):
+        with gr.Tab("AI Fit Pro Coach"):
             gr.Markdown(
                 "Ask about meal planning, ingredients, macros, food labels, or recovery nutrition."
             )
@@ -382,7 +382,7 @@ def build_demo() -> gr.Blocks:
             )
 
         gr.Markdown(
-            "Built from the FitLife-AI project. AI output is educational and is not medical advice."
+            "AI Fit Pro is based on the FitLife-AI project. AI output is educational and is not medical advice."
         )
 
     return demo

@@ -34,14 +34,14 @@ const heroSignals = [
 ];
 
 const differentiators = [
-  ['Connected product surfaces', 'Fuel Scan, Form Coach, and FitLife Coach work together as one training workflow.'],
+  ['Connected product surfaces', 'Fuel Scan, Form Coach, and AI Fit Pro Coach work together as one training workflow.'],
   ['Profile-aware guidance', 'Nutrition scoring and coaching stay grounded in the user profile instead of generic tips.'],
   ['Practical feedback loops', 'Each tool is designed to turn uploads and questions into clear next actions.'],
 ];
 
 const sessionFlow = [
   ['1', 'Capture an input', 'Scan a food label, upload a lift, or ask a nutrition question.'],
-  ['2', 'Get profile-aware analysis', 'FitLife combines your goal, activity level, and history before responding.'],
+  ['2', 'Get profile-aware analysis', 'AI Fit Pro combines your goal, activity level, and history before responding.'],
   ['3', 'Turn feedback into action', 'Use clear scores, notes, and meal suggestions to improve the next session.'],
 ];
 
@@ -53,7 +53,7 @@ export default function HomePage() {
         <div className="relative mx-auto max-w-6xl px-4 pb-12 pt-14 sm:px-6 sm:pb-20 sm:pt-24">
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-flex rounded-full border border-accent/30 bg-accent-glow px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-accent sm:px-4 sm:text-xs sm:tracking-[0.24em]">
-              FitLife AI
+              AI Fit Pro
             </span>
             <h1 className="mx-auto mt-5 max-w-[9.5ch] font-display text-[clamp(2rem,11vw,4.75rem)] font-bold leading-[0.92] tracking-tight sm:mt-6 sm:max-w-none sm:text-[clamp(2.75rem,11vw,4.75rem)] sm:leading-[0.98] lg:text-6xl">
               <span className="block">Labels, lifts, and</span>
@@ -63,7 +63,7 @@ export default function HomePage() {
               <HeroSlogan />
             </div>
             <p className="mx-auto mt-5 max-w-[18.5rem] text-[14px] leading-7 text-text-secondary sm:mt-6 sm:max-w-2xl sm:text-lg sm:leading-relaxed">
-              FitLife packages OCR nutrition scanning, video-based form analysis, and an AI meal coach into one product experience built with Next.js, Flask, computer vision, and grounded nutrition guidance.
+              AI Fit Pro packages OCR nutrition scanning, video-based form analysis, and an AI meal coach into one product experience built with Next.js, Flask, computer vision, and grounded nutrition guidance.
             </p>
           </div>
 
@@ -126,7 +126,7 @@ export default function HomePage() {
               </span>
               <h2 className="mt-4 font-display text-3xl font-bold">Built to turn inputs into useful coaching</h2>
               <p className="mt-4 leading-relaxed text-text-secondary">
-                FitLife brings food scans, workout analysis, and nutrition coaching into one loop so each interaction leads to a practical next step.
+                AI Fit Pro brings food scans, workout analysis, and nutrition coaching into one loop so each interaction leads to a practical next step.
               </p>
               <ul className="mt-6 space-y-3">
                 {stackHighlights.map((item) => (
@@ -162,9 +162,9 @@ export default function HomePage() {
         <div className="fitlife-panel-gradient rounded-[2rem] border border-border p-10 shadow-sm shadow-black/5 lg:p-14">
           <div className="grid gap-10 lg:grid-cols-[1.35fr_0.85fr]">
             <div>
-              <h2 className="font-display text-3xl font-bold">Why FitLife works as a product</h2>
+              <h2 className="font-display text-3xl font-bold">Why AI Fit Pro works as a product</h2>
               <p className="mt-4 max-w-2xl text-text-secondary">
-                FitLife brings nutrition scanning, workout analysis, and AI coaching into one system that feels coherent, measurable, and useful.
+                AI Fit Pro brings nutrition scanning, workout analysis, and AI coaching into one system that feels coherent, measurable, and useful.
               </p>
             </div>
 
@@ -184,7 +184,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-3xl px-6 py-24 text-center">
           <h2 className="font-display text-3xl font-bold">Start building a better nutrition and training routine.</h2>
           <p className="mt-4 text-text-secondary">
-            Create an account, set your profile, and use Fuel Scan, Form Coach, and FitLife Coach from one place.
+            Create an account, set your profile, and use Fuel Scan, Form Coach, and AI Fit Pro Coach from one place.
           </p>
           <Link
             href="/register"

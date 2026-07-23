@@ -1,4 +1,4 @@
-# FitLife Project - Setup and Run Guide
+# AI Fit Pro Project - Setup and Run Guide
 
 ## Quick Start (Already Set Up)
 

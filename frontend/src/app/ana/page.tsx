@@ -50,7 +50,7 @@ export default function AnaPage() {
           </svg>
         </div>
         <div>
-          <h1 className="font-display text-lg font-bold">FitLife Coach</h1>
+          <h1 className="font-display text-lg font-bold">AI Fit Pro Coach</h1>
           <p className="text-xs text-text-tertiary">Nutrition and recovery assistant</p>
         </div>
       </div>

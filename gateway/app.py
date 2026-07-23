@@ -1,5 +1,5 @@
 """
-FitLife API Gateway
+AI Fit Pro API Gateway
 Main application entry point with authentication and routing to microservices.
 Primarily serves the JSON API used by the Next.js frontend, while keeping
 legacy routes available as redirects for compatibility.
@@ -104,7 +104,7 @@ def _space_root_html() -> str:
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>FitLife AI API</title>
+  <title>AI Fit Pro API</title>
   <style>
     :root {{
       color-scheme: light;
@@ -198,9 +198,9 @@ def _space_root_html() -> str:
 </head>
 <body>
   <main class="card">
-    <span class="eyebrow">FitLife Backend</span>
+    <span class="eyebrow">AI Fit Pro Backend</span>
     <h1>AI fitness API is live.</h1>
-    <p>This Hugging Face Space serves the FitLife gateway used by the public frontend for auth, nutrition OCR, workout analysis, and coach chat.</p>
+    <p>This Hugging Face Space serves the AI Fit Pro gateway used by the public frontend for auth, nutrition OCR, workout analysis, and coach chat.</p>
     <div class="links">
       <a class="primary" href="{frontend}" target="_blank" rel="noreferrer">Open Frontend</a>
       <a href="/health" target="_blank" rel="noreferrer">Health Check</a>
@@ -509,7 +509,7 @@ def _register_legacy_auth(app):
             db.session.add(user)
             db.session.commit()
             login_user(user)
-            flash('Welcome to FitLife!', 'success')
+            flash('Welcome to AI Fit Pro!', 'success')
             return redirect(f"{_frontend_url()}/dashboard")
         return render_template('auth/register.html')
 

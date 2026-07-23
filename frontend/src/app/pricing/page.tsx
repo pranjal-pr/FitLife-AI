@@ -5,7 +5,7 @@ const plans = [
     name: 'Starter',
     price: '$0',
     period: 'forever',
-    features: ['5 label scans / month', '2 workout analyses / month', 'FitLife Coach access', 'Basic dashboard insights'],
+    features: ['5 label scans / month', '2 workout analyses / month', 'AI Fit Pro Coach access', 'Basic dashboard insights'],
     cta: 'Start Free',
     href: '/register',
     accent: false,

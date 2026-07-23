@@ -1,5 +1,5 @@
 """
-JWT Authentication for FitLife API Gateway.
+JWT Authentication for AI Fit Pro API Gateway.
 
 Provides token generation, validation, and decorator-based route protection
 that works alongside the existing Flask-Login session auth.

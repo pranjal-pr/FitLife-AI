@@ -1,8 +1,8 @@
-# FitLife - AI Fitness and Nutrition Coach
+# AI Fit Pro - Fitness and Nutrition Coach
 
 <div align="center">
 
-**Scan food labels, review workout form, and ask FitLife Coach for meal and recovery guidance.**
+**Scan food labels, review workout form, and ask AI Fit Pro Coach for meal and recovery guidance.**
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue)](https://python.org)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org)
@@ -23,11 +23,11 @@ Deployment URLs are intentionally supplied through environment variables instead
 
 ## Overview
 
-FitLife is a full-stack fitness product with three core surfaces:
+AI Fit Pro is a full-stack fitness product with three core surfaces:
 
 - **Fuel Scan** - upload a nutrition label photo and get extracted nutrition data, scoring, and profile-aware recommendations.
 - **Form Coach** - upload a workout clip and receive rep counting, movement scoring, and coaching cues powered by YOLO pose checkpoints.
-- **FitLife Coach** - ask nutrition and recovery questions through a profile-aware AI assistant.
+- **AI Fit Pro Coach** - ask nutrition and recovery questions through a profile-aware AI assistant.
 
 The repository includes two interfaces:
 
@@ -188,7 +188,7 @@ All API routes are prefixed with `/api/v1/`.
 | POST | `/nutri-ai/analyze` | Optional | Analyze extracted nutrition data |
 | POST | `/muscle-ai/upload` | Optional | Upload workout video |
 | GET | `/muscle-ai/task/:id` | - | Poll async task status |
-| POST | `/ana/chat` | Optional | Chat with FitLife Coach |
+| POST | `/ana/chat` | Optional | Chat with AI Fit Pro Coach |
 
 ---
 
@@ -215,7 +215,7 @@ The native [`gradio_app.py`](gradio_app.py) exposes three tabs:
 
 - Fuel Scan for label OCR and profile-aware nutrition scoring;
 - Form Coach for YOLO workout-video analysis; and
-- FitLife Coach for nutrition and recovery chat.
+- AI Fit Pro Coach for nutrition and recovery chat.
 
 #### 1. Configure GitHub Actions
 

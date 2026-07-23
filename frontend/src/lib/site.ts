@@ -4,10 +4,10 @@ const backendAppUrl = (
 ).replace(/\/$/, '');
 
 export const site = {
-  name: 'FitLife',
-  title: 'FitLife - AI Fitness and Nutrition Coach',
+  name: 'AI Fit Pro',
+  title: 'AI Fit Pro - Fitness and Nutrition Coach',
   description:
-    'FitLife is a full-stack wellness app that combines OCR nutrition scans, pose-based workout feedback, and an AI coach into one daily training workflow.',
+    'AI Fit Pro is a full-stack wellness app that combines OCR nutrition scans, pose-based workout feedback, and an AI coach into one daily training workflow.',
   contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'hello@example.com',
   backend: {
     appUrl: backendAppUrl,
@@ -18,7 +18,7 @@ export const site = {
 export const navLinks = [
   { href: '/nutri-ai', label: 'Fuel Scan' },
   { href: '/muscle-ai', label: 'Form Coach' },
-  { href: '/ana', label: 'FitLife Coach' },
+  { href: '/ana', label: 'AI Fit Pro Coach' },
   { href: '/pricing', label: 'Plans' },
 ];
 
@@ -38,7 +38,7 @@ export const products = [
   {
     href: '/ana',
     badge: 'Nutrition-aware coach',
-    title: 'FitLife Coach',
+    title: 'AI Fit Pro Coach',
     desc: 'Ask for meal ideas, recovery suggestions, and ingredient swaps from a nutrition-aware AI assistant.',
   },
 ];

@@ -3,7 +3,7 @@ const timeline = [
     quarter: 'Q1 2026',
     status: 'completed',
     items: [
-      'FitLife brand system and landing experience',
+      'AI Fit Pro brand system and landing experience',
       'Fuel Scan OCR workflow',
       'JWT authentication and user dashboard',
       'Async workout analysis pipeline',

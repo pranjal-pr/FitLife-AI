@@ -1,5 +1,5 @@
 """
-FitLife Gateway Configuration
+AI Fit Pro Gateway Configuration
 Environment-based configuration for different deployment scenarios
 """
 
@@ -13,7 +13,7 @@ class BaseConfig:
     """Base configuration - common across all environments"""
     
     # Application
-    APP_NAME = 'FitLife'
+    APP_NAME = 'AI Fit Pro'
     VERSION = '2.0.0'
     
     # Flask

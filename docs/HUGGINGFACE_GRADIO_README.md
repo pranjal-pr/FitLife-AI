@@ -1,5 +1,5 @@
 ---
-title: FitLife AI
+title: AI Fit Pro
 emoji: 💪
 colorFrom: green
 colorTo: green
@@ -12,9 +12,9 @@ license: mit
 short_description: Nutrition scanning, workout analysis, and AI coaching
 ---
 
-# FitLife AI
+# AI Fit Pro
 
-FitLife AI is a Gradio demo for:
+AI Fit Pro is a Gradio demo for:
 
 - profile-aware nutrition-label analysis;
 - YOLO-powered workout form analysis; and

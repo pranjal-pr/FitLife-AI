@@ -19,7 +19,7 @@ export default function ChatSuggestions({ onSelect }: Props) {
           <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 3z" />
         </svg>
       </div>
-      <h2 className="font-display text-xl font-bold">Chat with FitLife Coach</h2>
+      <h2 className="font-display text-xl font-bold">Chat with AI Fit Pro Coach</h2>
       <p className="max-w-md text-center text-sm text-text-secondary">
         Ask for meal ideas, ingredient swaps, recovery meals, or a simple nutrition plan around your training week.
       </p>
