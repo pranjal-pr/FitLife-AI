@@ -104,7 +104,7 @@ jobs:
           mkdir -p hf-space/model
           cp -r model/models hf-space/model/models
 
-      - name: Install Hugging Face CLI
+      - name: Install Hugging Face Hub client
         if: steps.hf-secrets.outputs.ready == 'true'
         run: |
           python -m pip install --upgrade huggingface_hub
@@ -113,24 +113,41 @@ jobs:
         if: steps.hf-secrets.outputs.ready == 'true'
         run: hf auth whoami
 
-      - name: Upload to Hugging Face Space
+      - name: Upload directly to existing Hugging Face Space
         if: steps.hf-secrets.outputs.ready == 'true'
         run: |
-          set +e
-          upload_output=$(hf upload "$HF_SPACE_REPO" hf-space . \
-            --repo-type space \
-            --delete "*" \
-            --commit-message "Deploy native Gradio app from GitHub Actions (${GITHUB_SHA})" \
-            --token "$HF_TOKEN" 2>&1)
-          upload_status=$?
-          set -e
+          python - <<'PY'
+          import os
 
-          printf '%s\n' "$upload_output"
+          from huggingface_hub import HfApi
 
-          if [ "$upload_status" -ne 0 ]; then
-            error_message=$(printf '%s\n' "$upload_output" | tail -n 12 | tr '\n' ' ')
-            error_message="${error_message//'%'/'%25'}"
-            error_message="${error_message//$'\r'/'%0D'}"
-            echo "::error title=Hugging Face upload failed::$error_message"
-            exit "$upload_status"
-          fi
+          repo_id = os.environ["HF_SPACE_REPO"]
+          token = os.environ["HF_TOKEN"]
+          api = HfApi(token=token)
+
+          try:
+              space = api.repo_info(
+                  repo_id=repo_id,
+                  repo_type="space",
+                  token=token,
+              )
+              print(f"Uploading to existing Gradio Space: {space.id}")
+
+              result = api.upload_folder(
+                  repo_id=repo_id,
+                  repo_type="space",
+                  folder_path="hf-space",
+                  path_in_repo=".",
+                  delete_patterns="*",
+                  commit_message=(
+                      "Deploy native Gradio app from GitHub Actions "
+                      f"({os.environ['GITHUB_SHA']})"
+                  ),
+                  token=token,
+              )
+              print(f"Space updated: {result.commit_url}")
+          except Exception as exc:
+              message = str(exc).replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+              print(f"::error title=Hugging Face upload failed::{message}")
+              raise
+          PY
