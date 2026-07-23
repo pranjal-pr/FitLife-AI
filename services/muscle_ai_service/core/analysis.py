@@ -12,7 +12,7 @@ from typing import Any
 
 from ..config.settings import Config
 from ..utils.video import process_video
-from .models.yolo import get_yolo_models
+from .models.yolo import get_yolo_model, get_yolo_models
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +113,7 @@ def format_analysis_result(
         'form_metrics': metrics.get('form_metrics', {}),
         'depth_metrics': metrics.get('depth_metrics', {}),
         'video_url': video_url,
-        'model_labels': get_yolo_models()[exercise_type].names,
+        'model_labels': get_yolo_model(exercise_type).names,
     }
 
 
