@@ -4,15 +4,9 @@ Video processing utilities
 import logging
 import cv2
 import torch
-import numpy as np
 from ..core.models.analyzer import MovementAnalyzer
 
 logger = logging.getLogger(__name__)
-
-class NullContext:
-    """A context manager that does nothing"""
-    def __enter__(self): return None
-    def __exit__(self, *excinfo): pass
 
 def process_video(video_path, output_path, web_path, exercise_type, yolo_model):
     """
@@ -58,58 +52,60 @@ def process_video(video_path, output_path, web_path, exercise_type, yolo_model):
         # Batch processing parameters
         batch_size = 4 if use_gpu else 1
         
-        # Use CUDA stream for parallel processing
-        with torch.cuda.amp.autocast() if use_gpu else NullContext():
-            for _ in range(0, total_frames, batch_size):
-                frames_buffer = []
-                for _ in range(batch_size):
-                    ret, frame = cap.read()
-                    if ret:
-                        frames_buffer.append(frame)
-                    else:
-                        break
-                
-                if not frames_buffer:
+        for frame_offset in range(0, total_frames, batch_size):
+            frames_buffer = []
+            for _ in range(batch_size):
+                ret, frame = cap.read()
+                if ret:
+                    frames_buffer.append(frame)
+                else:
                     break
 
-                # Process batch
-                if use_gpu:
-                    frames_tensor = torch.from_numpy(np.stack(frames_buffer)).cuda().half()
-                    results = yolo_model(frames_tensor, stream=True)
-                else:
-                    results = yolo_model(frames_buffer, stream=True)
+            if not frames_buffer:
+                break
 
-                # Process results
-                for frame, result in zip(frames_buffer, results):
-                    labels = {}
-                    if result.boxes is not None:
-                        for box in result.boxes:
-                            class_id = int(box.cls)
-                            conf = float(box.conf)
-                            label = result.names[class_id]
-                            labels[label] = conf
+            # Ultralytics accepts OpenCV frames directly and performs the required
+            # BGR-to-RGB, BHWC-to-BCHW, resize, and normalization steps itself.
+            # Passing a manually-created BHWC CUDA tensor bypasses that preprocessing
+            # and crashes on GPU with an incompatible input-shape error.
+            results = yolo_model(
+                frames_buffer,
+                stream=True,
+                verbose=False,
+                device=0 if use_gpu else 'cpu',
+            )
 
-                    form_value, down_value = analyzer.process_frame(labels)
+            # Process results
+            for frame, result in zip(frames_buffer, results):
+                labels = {}
+                if result.boxes is not None:
+                    for box in result.boxes:
+                        class_id = int(box.cls)
+                        conf = float(box.conf)
+                        label = result.names[class_id]
+                        labels[label] = conf
 
-                    if hasattr(result, 'keypoints') and result.keypoints is not None:
-                        keypoints_xy = getattr(result.keypoints, 'xy', None)
-                        if keypoints_xy is not None and len(keypoints_xy) > 0:
-                            for point in keypoints_xy[0]:
-                                x, y = int(point[0]), int(point[1])
-                                cv2.circle(frame, (x, y), 5, (0, 255, 0), -1)
+                form_value, down_value = analyzer.process_frame(labels)
 
-                    metrics = analyzer.get_metrics()
-                    if metrics:
-                        cv2.putText(frame, f"Score: {metrics['movement_assessment']['score']}/10",
-                                  (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-                        cv2.putText(frame, f"Reps: {metrics['repetitions']}",
-                                  (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                if hasattr(result, 'keypoints') and result.keypoints is not None:
+                    keypoints_xy = getattr(result.keypoints, 'xy', None)
+                    if keypoints_xy is not None and len(keypoints_xy) > 0:
+                        for point in keypoints_xy[0]:
+                            x, y = int(point[0]), int(point[1])
+                            cv2.circle(frame, (x, y), 5, (0, 255, 0), -1)
 
-                    out.write(frame)
+                metrics = analyzer.get_metrics()
+                if metrics:
+                    cv2.putText(frame, f"Score: {metrics['movement_assessment']['score']}/10",
+                              (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                    cv2.putText(frame, f"Reps: {metrics['repetitions']}",
+                              (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
-                # Clear GPU cache periodically
-                if use_gpu and _ % (batch_size * 10) == 0:
-                    torch.cuda.empty_cache()
+                out.write(frame)
+
+            # Clear GPU cache periodically
+            if use_gpu and frame_offset % (batch_size * 10) == 0:
+                torch.cuda.empty_cache()
 
         cap.release()
         out.release()

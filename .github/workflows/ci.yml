@@ -64,5 +64,8 @@ jobs:
       - name: Smoke test workout model loading
         run: python -c "from services.muscle_ai_service.core.models.yolo import get_yolo_models; models = get_yolo_models(); print(sorted(models.keys()))"
 
+      - name: Test workout video preprocessing
+        run: python -m unittest discover -s tests -p "test_video_processing.py"
+
       - name: Print embedded workout metrics
         run: python scripts/evaluate_muscle_models.py
