@@ -35,7 +35,10 @@ from services.nutri_ai_service.core.ana.ana_agent import chat as nutrition_chat 
 try:
     import spaces
 
-    gpu_task = spaces.GPU(duration=180)
+    # Keep the ZeroGPU reservation below the free-tier maximum. A 180-second
+    # request is weighted as 270 seconds on the selected hardware and is
+    # rejected before the workout function starts.
+    gpu_task = spaces.GPU(duration=60)
 except ImportError:
     # The decorator is supplied by ZeroGPU. Keeping a local no-op makes the
     # same app testable on ordinary CPU machines.
