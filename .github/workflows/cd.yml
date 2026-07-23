@@ -94,6 +94,7 @@ jobs:
         run: |
           mkdir -p hf-space
           cp Dockerfile hf-space/Dockerfile
+          cp LICENSE hf-space/LICENSE
           cp requirements-space.txt hf-space/requirements-space.txt
           cp -r gateway hf-space/gateway
           cp -r services hf-space/services

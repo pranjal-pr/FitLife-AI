@@ -1,16 +1,23 @@
 ---
 title: FitLife AI API
-emoji: "🏋️"
+emoji: "💪"
 colorFrom: blue
 colorTo: green
 sdk: docker
 app_port: 7860
 pinned: false
+license: mit
+short_description: AI fitness and nutrition backend API
 ---
 
 # FitLife AI API
 
-This Space runs the Flask backend for FitLife.
+This Space runs the Flask backend for FitLife and is maintained by
+[pranjal-pr](https://github.com/pranjal-pr).
+
+It is based on the original
+[FitLife-AI project](https://github.com/shinzoxD/FitLife-AI) by Nishchay
+Sharma (`shinzoxD`) and retains the project's MIT license notice.
 
 Set these Space variables before the first launch:
 
@@ -28,3 +35,5 @@ The backend serves:
 - `/api/v1/nutri-ai/*`
 - `/api/v1/muscle-ai/*`
 - `/api/v1/ana/chat`
+
+See [`LICENSE`](LICENSE) for reuse terms and attribution.
