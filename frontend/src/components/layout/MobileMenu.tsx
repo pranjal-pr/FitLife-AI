@@ -21,11 +21,11 @@ export default function MobileMenu({ open, onClose, links, user, loading = false
   const panelRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
   const shouldShowLoadingState = useMemo(() => {
-    if (typeof window === 'undefined') return loading;
+    if (!mounted) return loading;
     const params = new URLSearchParams(window.location.search);
     const { access, refresh } = getTokens();
     return loading && (!!access || !!refresh || (params.has('access_token') && params.has('refresh_token')));
-  }, [loading]);
+  }, [loading, mounted]);
 
   useEffect(() => {
     setMounted(true);

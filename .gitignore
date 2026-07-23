@@ -64,6 +64,7 @@ out/
 frontend/node_modules/
 frontend/.next/
 frontend/out/
+*.tsbuildinfo
 
 # ===========================
 # OS / Editor

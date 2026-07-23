@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { getTokens } from '@/lib/api';
@@ -11,12 +11,18 @@ import { navLinks, site } from '@/lib/site';
 export default function Navbar() {
   const { user, loading, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const shouldShowLoadingState = useMemo(() => {
-    if (typeof window === 'undefined') return loading;
+    if (!mounted) return loading;
     const params = new URLSearchParams(window.location.search);
     const { access, refresh } = getTokens();
     return loading && (!!access || !!refresh || (params.has('access_token') && params.has('refresh_token')));
-  }, [loading]);
+  }, [loading, mounted]);
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-bg-primary/80 backdrop-blur-lg">
