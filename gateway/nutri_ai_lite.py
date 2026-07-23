@@ -20,8 +20,7 @@ GROQ_MODELS = [
 ]
 
 VISION_MODELS = [
-    "meta-llama/llama-4-scout-17b-16e-instruct",
-    "llama-3.3-70b-versatile",
+    "qwen/qwen3.6-27b",
 ]
 
 
@@ -56,7 +55,12 @@ def _call_groq_text(messages: list, api_key: str) -> Optional[str]:
     return None
 
 
-def _call_groq_vision(image_b64: str, mime_type: str, prompt: str, api_key: str) -> Optional[str]:
+def _call_groq_vision(
+    image_b64: str,
+    mime_type: str,
+    prompt: str,
+    api_key: str,
+) -> Tuple[Optional[str], Optional[str]]:
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
 
@@ -68,19 +72,29 @@ def _call_groq_vision(image_b64: str, mime_type: str, prompt: str, api_key: str)
         ],
     }]
 
+    last_error = None
     for model in VISION_MODELS:
         try:
             resp = requests.post(url, headers=headers, json={
                 "model": model,
                 "messages": messages,
                 "temperature": 0.1,
-                "max_tokens": 1000,
+                "max_completion_tokens": 1000,
+                "reasoning_effort": "none",
+                "response_format": {"type": "json_object"},
             }, timeout=45)
             if resp.ok:
-                return resp.json()["choices"][0]["message"]["content"]
-        except Exception:
+                return resp.json()["choices"][0]["message"]["content"], None
+
+            try:
+                error_payload = resp.json().get("error", {})
+                last_error = error_payload.get("message") or f"HTTP {resp.status_code}"
+            except (ValueError, AttributeError):
+                last_error = f"HTTP {resp.status_code}"
+        except requests.RequestException as error:
+            last_error = f"Groq request failed: {error.__class__.__name__}"
             continue
-    return None
+    return None, last_error
 
 
 def extract_nutrition_from_image(image_bytes: bytes, mime_type: str) -> Dict:
@@ -100,9 +114,12 @@ def extract_nutrition_from_image(image_bytes: bytes, mime_type: str) -> Dict:
         "\"fat\": 10, \"saturated_fat\": 3, \"trans_fat\": 0, \"sodium\": 480, \"fiber\": 3}"
     )
 
-    result = _call_groq_vision(image_b64, mime_type, prompt, api_key)
+    result, vision_error = _call_groq_vision(image_b64, mime_type, prompt, api_key)
     if not result:
-        return {"error": "Could not extract nutrition info from image"}
+        message = "Could not extract nutrition info from image"
+        if vision_error:
+            message = f"{message}: {vision_error}"
+        return {"error": message}
 
     try:
         start = result.find("{")

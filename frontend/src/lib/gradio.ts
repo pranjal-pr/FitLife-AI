@@ -47,6 +47,18 @@ function normalizeError(error: unknown, fallback: string) {
   if (typeof error === 'string' && error) {
     return new Error(error);
   }
+  if (error && typeof error === 'object') {
+    const details = error as {
+      message?: unknown;
+      error?: unknown;
+      detail?: unknown;
+    };
+    for (const value of [details.message, details.error, details.detail]) {
+      if (typeof value === 'string' && value.trim()) {
+        return new Error(value);
+      }
+    }
+  }
   return new Error(fallback);
 }
 

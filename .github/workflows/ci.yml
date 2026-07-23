@@ -67,5 +67,8 @@ jobs:
       - name: Test workout video preprocessing
         run: python -m unittest discover -s tests -p "test_video_processing.py"
 
+      - name: Test nutrition vision integration
+        run: python -m unittest discover -s tests -p "test_nutri_ai_lite.py"
+
       - name: Print embedded workout metrics
         run: python scripts/evaluate_muscle_models.py
