@@ -104,23 +104,20 @@ jobs:
           mkdir -p hf-space/model
           cp -r model/models hf-space/model/models
 
-      - name: Initialize Space repository and Git LFS
+      - name: Install Hugging Face CLI
         if: steps.hf-secrets.outputs.ready == 'true'
         run: |
-          cd hf-space
-          git init
-          git checkout -b main
-          git lfs install --local
-          git lfs track "*.pt"
+          python -m pip install --upgrade huggingface_hub
 
-      - name: Push to Hugging Face Space
+      - name: Verify Hugging Face authentication
+        if: steps.hf-secrets.outputs.ready == 'true'
+        run: hf auth whoami
+
+      - name: Upload to Hugging Face Space
         if: steps.hf-secrets.outputs.ready == 'true'
         run: |
-          cd hf-space
-          HF_USERNAME="${HF_SPACE_REPO%%/*}"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .
-          git commit -m "Deploy native Gradio app from GitHub Actions (${GITHUB_SHA})"
-          git remote add origin "https://${HF_USERNAME}:${HF_TOKEN}@huggingface.co/spaces/${HF_SPACE_REPO}"
-          git push --force origin main
+          hf upload "$HF_SPACE_REPO" hf-space . \
+            --repo-type space \
+            --delete "*" \
+            --commit-message "Deploy native Gradio app from GitHub Actions (${GITHUB_SHA})" \
+            --token "$HF_TOKEN"
