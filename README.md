@@ -17,6 +17,11 @@
 
 This repository is maintained by [pranjal-pr](https://github.com/pranjal-pr) and is configured for an independent deployment. It is based on the original [FitLife-AI project](https://github.com/shinzoxD/FitLife-AI) by Nishchay Sharma (`shinzoxD`). See [License](#license) for reuse terms and attribution.
 
+Live deployments:
+
+- [AI Fit Pro frontend](https://ai-fit-pro-pranjal.vercel.app/)
+- [AI Fit Pro Hugging Face Space](https://praanjalpradhan-ai-fit-pro.hf.space/)
+
 Deployment URLs are intentionally supplied through environment variables instead of pointing at the upstream author's services.
 
 ---

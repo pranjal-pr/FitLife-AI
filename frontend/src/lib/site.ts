@@ -3,9 +3,15 @@ const backendAppUrl = (
   'https://praanjalpradhan-ai-fit-pro.hf.space'
 ).replace(/\/$/, '');
 
+const siteUrl = (
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  'https://ai-fit-pro-pranjal.vercel.app'
+).replace(/\/$/, '');
+
 export const site = {
   name: 'AI Fit Pro',
   title: 'AI Fit Pro - Fitness and Nutrition Coach',
+  url: siteUrl,
   description:
     'AI Fit Pro is a full-stack wellness app that combines OCR nutrition scans, pose-based workout feedback, and an AI coach into one daily training workflow.',
   contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'hello@example.com',

@@ -16,8 +16,17 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(site.url),
   title: { default: site.title, template: `%s | ${site.name}` },
   description: site.description,
+  alternates: { canonical: '/' },
+  openGraph: {
+    type: 'website',
+    url: site.url,
+    siteName: site.name,
+    title: site.title,
+    description: site.description,
+  },
 };
 
 const themeScript = `
