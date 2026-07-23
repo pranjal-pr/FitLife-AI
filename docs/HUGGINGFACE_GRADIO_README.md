@@ -1,7 +1,7 @@
 ---
 title: FitLife AI
 emoji: 💪
-colorFrom: orange
+colorFrom: green
 colorTo: green
 sdk: gradio
 sdk_version: 6.20.0
