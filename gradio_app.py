@@ -246,152 +246,146 @@ def analyze_workout(
     return display_video, result, summary
 
 
+APP_URL = os.environ.get("FITLIFE_APP_URL", "https://ai-fit-pro-pranjal.vercel.app")
+
+
 def build_demo() -> gr.Blocks:
     with gr.Blocks(
         title="AI Fit Pro",
         delete_cache=(3600, 3600),
     ) as demo:
         gr.HTML(
-            """
+            f"""
             <section class="fitlife-hero">
-              <p>PERSONAL AI FITNESS LAB</p>
-              <h1>Train smarter. Eat with context.</h1>
+              <p>AI FIT PRO</p>
+              <h1>Backend service</h1>
               <p class="fitlife-muted">
-                Scan nutrition labels, review workout form, and ask a
-                profile-aware nutrition and recovery coach.
+                This Space hosts the AI Fit Pro backend API. The app is hosted
+                here: <a href="{APP_URL}" target="_blank" rel="noopener">{APP_URL}</a>
               </p>
             </section>
             """
         )
 
-        with gr.Tab("Fuel Scan"):
-            gr.Markdown(
-                "Upload a clear nutrition label and add your basic profile for a personalized score."
-            )
-            with gr.Row():
-                with gr.Column(scale=1):
-                    nutrition_image = gr.Image(
-                        label="Nutrition label",
-                        type="filepath",
-                        sources=["upload", "webcam"],
-                    )
-                    with gr.Row():
-                        age = gr.Number(label="Age", value=28, minimum=13, maximum=100)
-                        gender = gr.Dropdown(
-                            ["Male", "Female"],
-                            value="Male",
-                            label="Gender",
+        # The components below register the API endpoints (analyze_nutrition,
+        # analyze_workout, coach) that the Next.js frontend calls through
+        # @gradio/client. They are kept out of view so the Space only shows the
+        # backend landing message above.
+        with gr.Column(visible=False):
+            with gr.Tab("Fuel Scan"):
+                with gr.Row():
+                    with gr.Column(scale=1):
+                        nutrition_image = gr.Image(
+                            label="Nutrition label",
+                            type="filepath",
+                            sources=["upload", "webcam"],
                         )
-                    with gr.Row():
-                        height = gr.Number(
-                            label="Height (cm)",
-                            value=175,
-                            minimum=100,
-                            maximum=250,
+                        with gr.Row():
+                            age = gr.Number(label="Age", value=28, minimum=13, maximum=100)
+                            gender = gr.Dropdown(
+                                ["Male", "Female"],
+                                value="Male",
+                                label="Gender",
+                            )
+                        with gr.Row():
+                            height = gr.Number(
+                                label="Height (cm)",
+                                value=175,
+                                minimum=100,
+                                maximum=250,
+                            )
+                            weight = gr.Number(
+                                label="Weight (kg)",
+                                value=72,
+                                minimum=30,
+                                maximum=300,
+                            )
+                        activity = gr.Dropdown(
+                            ["sedentary", "light", "moderate", "active", "very_active"],
+                            value="moderate",
+                            label="Activity level",
+                            allow_custom_value=True,
                         )
-                        weight = gr.Number(
-                            label="Weight (kg)",
-                            value=72,
-                            minimum=30,
-                            maximum=300,
+                        goal = gr.Dropdown(
+                            ["lose weight", "maintain weight", "gain weight"],
+                            value="maintain weight",
+                            label="Goal",
+                            allow_custom_value=True,
                         )
-                    activity = gr.Dropdown(
-                        ["sedentary", "light", "moderate", "active", "very_active"],
-                        value="moderate",
-                        label="Activity level",
-                        allow_custom_value=True,
-                    )
-                    goal = gr.Dropdown(
-                        ["lose weight", "maintain weight", "gain weight"],
-                        value="maintain weight",
-                        label="Goal",
-                        allow_custom_value=True,
-                    )
-                    diet = gr.Dropdown(
-                        ["balanced", "vegetarian", "vegan", "high protein", "low carb"],
-                        value="balanced",
-                        label="Diet type",
-                        allow_custom_value=True,
-                    )
-                    allergies = gr.Textbox(
-                        label="Allergies",
-                        placeholder="peanuts, dairy",
-                    )
-                    conditions = gr.Textbox(
-                        label="Medical conditions",
-                        placeholder="diabetes, hypertension",
-                    )
-                    scan_button = gr.Button("Analyze label", variant="primary")
+                        diet = gr.Dropdown(
+                            ["balanced", "vegetarian", "vegan", "high protein", "low carb"],
+                            value="balanced",
+                            label="Diet type",
+                            allow_custom_value=True,
+                        )
+                        allergies = gr.Textbox(
+                            label="Allergies",
+                            placeholder="peanuts, dairy",
+                        )
+                        conditions = gr.Textbox(
+                            label="Medical conditions",
+                            placeholder="diabetes, hypertension",
+                        )
+                        scan_button = gr.Button("Analyze label", variant="primary")
 
-                with gr.Column(scale=1):
-                    score = gr.Number(label="Consumability score")
-                    explanation = gr.Markdown()
-                    with gr.Accordion("Extracted nutrition", open=True):
-                        nutrition_json = gr.JSON(label="Nutrition")
-                    with gr.Accordion("Calculated health metrics", open=False):
-                        metrics_json = gr.JSON(label="Health metrics")
+                    with gr.Column(scale=1):
+                        score = gr.Number(label="Consumability score")
+                        explanation = gr.Markdown()
+                        with gr.Accordion("Extracted nutrition", open=True):
+                            nutrition_json = gr.JSON(label="Nutrition")
+                        with gr.Accordion("Calculated health metrics", open=False):
+                            metrics_json = gr.JSON(label="Health metrics")
 
-            scan_button.click(
-                fn=analyze_nutrition,
-                inputs=[
-                    nutrition_image,
-                    age,
-                    gender,
-                    height,
-                    weight,
-                    activity,
-                    goal,
-                    diet,
-                    allergies,
-                    conditions,
-                ],
-                outputs=[nutrition_json, metrics_json, score, explanation],
-                api_name="analyze_nutrition",
-            )
+                scan_button.click(
+                    fn=analyze_nutrition,
+                    inputs=[
+                        nutrition_image,
+                        age,
+                        gender,
+                        height,
+                        weight,
+                        activity,
+                        goal,
+                        diet,
+                        allergies,
+                        conditions,
+                    ],
+                    outputs=[nutrition_json, metrics_json, score, explanation],
+                    api_name="analyze_nutrition",
+                )
 
-        with gr.Tab("Form Coach"):
-            gr.Markdown(
-                "Upload a short, well-lit clip with your full body visible. "
-                "The selected YOLO model scores movement confidence and counts clear repetitions."
-            )
-            with gr.Row():
-                with gr.Column():
-                    workout_video = gr.Video(label="Workout video", sources=["upload"])
-                    exercise = gr.Dropdown(
-                        list(EXERCISES),
-                        value="Squat",
-                        label="Exercise",
-                    )
-                    workout_button = gr.Button("Analyze workout", variant="primary")
-                with gr.Column():
-                    processed_video = gr.Video(label="Analyzed video")
-                    workout_summary = gr.Markdown()
-                    workout_json = gr.JSON(label="Detailed metrics")
+            with gr.Tab("Form Coach"):
+                with gr.Row():
+                    with gr.Column():
+                        workout_video = gr.Video(label="Workout video", sources=["upload"])
+                        exercise = gr.Dropdown(
+                            list(EXERCISES),
+                            value="Squat",
+                            label="Exercise",
+                        )
+                        workout_button = gr.Button("Analyze workout", variant="primary")
+                    with gr.Column():
+                        processed_video = gr.Video(label="Analyzed video")
+                        workout_summary = gr.Markdown()
+                        workout_json = gr.JSON(label="Detailed metrics")
 
-            workout_button.click(
-                fn=analyze_workout,
-                inputs=[workout_video, exercise],
-                outputs=[processed_video, workout_json, workout_summary],
-                api_name="analyze_workout",
-            )
+                workout_button.click(
+                    fn=analyze_workout,
+                    inputs=[workout_video, exercise],
+                    outputs=[processed_video, workout_json, workout_summary],
+                    api_name="analyze_workout",
+                )
 
-        with gr.Tab("AI Fit Pro Coach"):
-            gr.Markdown(
-                "Ask about meal planning, ingredients, macros, food labels, or recovery nutrition."
-            )
-            gr.ChatInterface(
-                fn=coach_reply,
-                examples=[
-                    "Build a high-protein vegetarian dinner from lentils, spinach, and rice.",
-                    "What should I eat after a heavy squat session?",
-                    "Help me reduce sodium without making my meals bland.",
-                ],
-                api_name="coach",
-            )
-
-        gr.Markdown(
-            "AI Fit Pro is based on the FitLife-AI project. AI output is educational and is not medical advice."
-        )
+            with gr.Tab("AI Fit Pro Coach"):
+                gr.ChatInterface(
+                    fn=coach_reply,
+                    examples=[
+                        "Build a high-protein vegetarian dinner from lentils, spinach, and rice.",
+                        "What should I eat after a heavy squat session?",
+                        "Help me reduce sodium without making my meals bland.",
+                    ],
+                    api_name="coach",
+                )
 
     return demo
 
