@@ -31,6 +31,11 @@ from gateway.nutri_ai_lite import (  # noqa: E402
     generate_score,
 )
 from services.nutri_ai_service.core.ana.ana_agent import chat as nutrition_chat  # noqa: E402
+from services.nutri_ai_service.core.profile.normalization import (  # noqa: E402
+    normalize_activity,
+    normalize_diet,
+    normalize_goal,
+)
 
 try:
     import spaces
@@ -104,9 +109,9 @@ def _profile(
         "gender": gender.lower(),
         "height_cm": float(height_cm),
         "weight_kg": float(weight_kg),
-        "activity_level": activity_level,
-        "goal": goal,
-        "diet_type": diet_type,
+        "activity_level": normalize_activity(activity_level),
+        "goal": normalize_goal(goal),
+        "diet_type": normalize_diet(diet_type),
         "allergies": _split_list(allergies),
         "medical_history": {"diseases": conditions},
     }
@@ -294,16 +299,19 @@ def build_demo() -> gr.Blocks:
                         ["sedentary", "light", "moderate", "active", "very_active"],
                         value="moderate",
                         label="Activity level",
+                        allow_custom_value=True,
                     )
                     goal = gr.Dropdown(
                         ["lose weight", "maintain weight", "gain weight"],
                         value="maintain weight",
                         label="Goal",
+                        allow_custom_value=True,
                     )
                     diet = gr.Dropdown(
                         ["balanced", "vegetarian", "vegan", "high protein", "low carb"],
                         value="balanced",
                         label="Diet type",
+                        allow_custom_value=True,
                     )
                     allergies = gr.Textbox(
                         label="Allergies",

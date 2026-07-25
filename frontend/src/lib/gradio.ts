@@ -66,28 +66,66 @@ function normalizeGender(value: string) {
   return value.toLowerCase() === 'female' ? 'Female' : 'Male';
 }
 
-function normalizeGoal(value: string) {
+function normalizedChoice(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ');
+}
+
+export function normalizeActivity(value: string) {
+  const activities: Record<string, string> = {
+    sedentary: 'sedentary',
+    light: 'light',
+    'lightly active': 'light',
+    moderate: 'moderate',
+    'moderately active': 'moderate',
+    active: 'active',
+    'very active': 'very_active',
+    extreme: 'very_active',
+    'extremely active': 'very_active',
+  };
+  return activities[normalizedChoice(value)] || 'moderate';
+}
+
+export function normalizeGoal(value: string) {
   const goals: Record<string, string> = {
     lose: 'lose weight',
     loss: 'lose weight',
+    'lose weight': 'lose weight',
     'weight loss': 'lose weight',
     maintain: 'maintain weight',
     maintenance: 'maintain weight',
+    'maintain weight': 'maintain weight',
+    'improve health': 'maintain weight',
+    'improve overall health': 'maintain weight',
     gain: 'gain weight',
+    'gain weight': 'gain weight',
     'weight gain': 'gain weight',
+    'gain muscle': 'gain weight',
+    'muscle gain': 'gain weight',
   };
-  return goals[value.toLowerCase()] || value.toLowerCase();
+  return goals[normalizedChoice(value)] || 'maintain weight';
 }
 
-function normalizeDiet(value: string) {
+export function normalizeDiet(value: string) {
   const diets: Record<string, string> = {
     omnivore: 'balanced',
     omnivorous: 'balanced',
     none: 'balanced',
+    balanced: 'balanced',
+    paleo: 'balanced',
+    vegetarian: 'vegetarian',
+    vegan: 'vegan',
+    keto: 'low carb',
+    ketogenic: 'low carb',
     'high-protein': 'high protein',
+    'high protein': 'high protein',
     'low-carb': 'low carb',
+    'low carb': 'low carb',
   };
-  return diets[value.toLowerCase()] || value.toLowerCase();
+  return diets[normalizedChoice(value)] || 'balanced';
 }
 
 function fileUrl(value: unknown): string | null {
@@ -126,7 +164,7 @@ export async function analyzeNutrition(
       gender: normalizeGender(profile.gender),
       height_cm: profile.height_cm,
       weight_kg: profile.weight_kg,
-      activity_level: profile.activity_level,
+      activity_level: normalizeActivity(profile.activity_level),
       goal: normalizeGoal(profile.goal),
       diet_type: normalizeDiet(profile.diet_type),
       allergies: profile.allergies.join(', '),
