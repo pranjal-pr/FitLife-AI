@@ -70,5 +70,8 @@ jobs:
       - name: Test nutrition vision integration
         run: python -m unittest discover -s tests -p "test_nutri_ai_lite.py"
 
+      - name: Test Gradio profile choice normalization
+        run: python -m unittest discover -s tests -p "test_gradio_profile.py"
+
       - name: Print embedded workout metrics
         run: python scripts/evaluate_muscle_models.py

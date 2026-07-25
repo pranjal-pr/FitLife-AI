@@ -132,12 +132,30 @@ def extract_nutrition_from_image(image_bytes: bytes, mime_type: str) -> Dict:
     return {"error": "Could not parse nutrition data from AI response", "raw": result[:500]}
 
 
+def _canonical_profile(profile: Dict) -> Dict:
+    """Map legacy frontend identifiers to Gradio-accepted profile values."""
+    from services.nutri_ai_service.core.profile.normalization import (
+        normalize_activity,
+        normalize_diet,
+        normalize_goal,
+    )
+
+    canonical = dict(profile or {})
+    canonical["activity_level"] = normalize_activity(canonical.get("activity_level"))
+    canonical["goal"] = normalize_goal(canonical.get("goal"))
+    canonical["diet_type"] = normalize_diet(canonical.get("diet_type"))
+    return canonical
+
+
 def calculate_health_metrics(profile: Dict) -> Dict:
     """Pure-Python health metrics calculation (no heavy deps)."""
+    profile = _canonical_profile(profile)
     height_cm = profile.get("height_cm", 170)
     weight_kg = profile.get("weight_kg", 70)
     age = profile.get("age", 30)
     gender = profile.get("gender", "male")
+    activity_level = profile.get("activity_level", "moderate")
+    goal = profile.get("goal", "maintain weight")
 
     height_m = height_cm / 100
     bmi = round(weight_kg / (height_m * height_m), 2)
@@ -157,9 +175,8 @@ def calculate_health_metrics(profile: Dict) -> Dict:
         bmr = (10 * weight_kg) + (6.25 * height_cm) - (5 * age) - 161
 
     multipliers = {"sedentary": 1.2, "light": 1.375, "moderate": 1.55, "active": 1.725, "very_active": 1.9}
-    tdee = round(bmr * multipliers.get(profile.get("activity_level", "moderate"), 1.55))
+    tdee = round(bmr * multipliers.get(activity_level, 1.55))
 
-    goal = profile.get("goal", "maintain weight")
     if goal == "lose weight":
         cal_target = tdee - 500
     elif goal == "gain weight":
@@ -187,6 +204,7 @@ def generate_score(user_profile: Dict, nutrition_info: Dict, health_metrics: Dic
     if not api_key:
         return 50, "Scoring unavailable (GROQ_API_KEY not set)."
 
+    user_profile = _canonical_profile(user_profile)
     book_chunks = _load_json("book_chunks.json")
     diseases_data = _load_json("diseases.json")
 
