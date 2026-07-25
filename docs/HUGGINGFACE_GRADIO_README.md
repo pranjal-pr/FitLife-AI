@@ -25,7 +25,7 @@ OCR, scoring, and AI chat. Workout analysis uses the model checkpoints bundled
 with this Space.
 
 This Space is maintained by
-[pranjal-pr](https://github.com/pranjal-pr/FitLife-AI). It is based on the
+[pranjal-pr](https://github.com/pranjal-pr/AI-Fit-Pro). It is based on the
 original [FitLife-AI project](https://github.com/shinzoxD/FitLife-AI) by
 Nishchay Sharma (`shinzoxD`) and retains the project's MIT license notice.
 

@@ -85,8 +85,8 @@ fitlife/
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/pranjal-pr/FitLife-AI.git
-cd FitLife-AI
+git clone https://github.com/pranjal-pr/AI-Fit-Pro.git
+cd AI-Fit-Pro
 ```
 
 ### 2. Backend setup
