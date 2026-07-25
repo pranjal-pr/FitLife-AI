@@ -8,6 +8,24 @@ from ..core.models.analyzer import MovementAnalyzer
 
 logger = logging.getLogger(__name__)
 
+
+CORE_KEYPOINTS = (5, 6, 11, 12, 13, 14, 15, 16)
+
+
+def _best_pose_index(result):
+    """Choose the detection with the most reliable body joints."""
+    keypoints = getattr(result, 'keypoints', None)
+    scores = getattr(keypoints, 'conf', None) if keypoints is not None else None
+    if scores is not None and len(scores) > 0:
+        core_scores = scores[:, list(CORE_KEYPOINTS)]
+        return int(core_scores.mean(dim=1).argmax().item())
+
+    boxes = getattr(result, 'boxes', None)
+    if boxes is not None and len(boxes) > 0:
+        return int(boxes.conf.argmax().item())
+    return None
+
+
 def process_video(video_path, output_path, web_path, exercise_type, yolo_model):
     """
     Process a video using the YOLO model and movement analyzer
@@ -73,26 +91,47 @@ def process_video(video_path, output_path, web_path, exercise_type, yolo_model):
                 stream=True,
                 verbose=False,
                 device=0 if use_gpu else 'cpu',
+                # These custom pose checkpoints retain accurate keypoints on
+                # real-world footage even when their movement-class confidence
+                # is low. The scorer validates joint confidence separately.
+                conf=0.01,
+                iou=0.5,
+                max_det=3,
             )
 
             # Process results
             for frame, result in zip(frames_buffer, results):
                 labels = {}
-                if result.boxes is not None:
-                    for box in result.boxes:
-                        class_id = int(box.cls)
-                        conf = float(box.conf)
-                        label = result.names[class_id]
-                        labels[label] = conf
+                pose_index = _best_pose_index(result)
+                pose_xy = None
+                pose_scores = None
 
-                form_value, down_value = analyzer.process_frame(labels)
+                if pose_index is not None and result.boxes is not None and len(result.boxes) > pose_index:
+                    box = result.boxes[pose_index]
+                    class_id = int(box.cls)
+                    labels[result.names[class_id]] = float(box.conf)
 
-                if hasattr(result, 'keypoints') and result.keypoints is not None:
+                if pose_index is not None and getattr(result, 'keypoints', None) is not None:
                     keypoints_xy = getattr(result.keypoints, 'xy', None)
-                    if keypoints_xy is not None and len(keypoints_xy) > 0:
-                        for point in keypoints_xy[0]:
-                            x, y = int(point[0]), int(point[1])
-                            cv2.circle(frame, (x, y), 5, (0, 255, 0), -1)
+                    keypoints_conf = getattr(result.keypoints, 'conf', None)
+                    if keypoints_xy is not None and len(keypoints_xy) > pose_index:
+                        pose_xy = keypoints_xy[pose_index].detach().cpu().numpy()
+                    if keypoints_conf is not None and len(keypoints_conf) > pose_index:
+                        pose_scores = keypoints_conf[pose_index].detach().cpu().numpy()
+
+                form_value, down_value = analyzer.process_frame(
+                    labels,
+                    keypoints=pose_xy,
+                    keypoint_scores=pose_scores,
+                    frame_shape=frame.shape,
+                )
+
+                if pose_xy is not None:
+                    for index, point in enumerate(pose_xy):
+                        if pose_scores is not None and pose_scores[index] < 0.15:
+                            continue
+                        x, y = int(point[0]), int(point[1])
+                        cv2.circle(frame, (x, y), 5, (0, 255, 0), -1)
 
                 metrics = analyzer.get_metrics()
                 if metrics:

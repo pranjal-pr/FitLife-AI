@@ -1,213 +1,288 @@
-# """
-# Movement analysis module
-# """
-# import numpy as np
+"""Pose-based movement analysis for the workout checkpoints."""
 
-# class MovementAnalyzer:
-#     """
-#     Analyzes exercise form and provides metrics on movement quality.
-#     This is a placeholder - you should implement the full movement
-#     analysis logic for your project.
-#     """
-#     def __init__(self, exercise_type):
-#         self.exercise_type = exercise_type
-#         self.form_values = []
-#         self.depth_values = []
-#         self.repetitions = 0
-#         self.in_rep = False
-#         self.down_threshold = 0.8  # Threshold for detecting bottom position
-#         self.rep_threshold = 0.89  # Threshold for counting a rep
-        
-#     def process_frame(self, labels):
-#         """Process a single frame with detected labels"""
-#         # Calculate form and depth values based on labels
-#         # This is simplified - implement your actual logic here
-#         form_value = max([labels.get(label, 0) for label in ["good_form", "proper_form"]], default=0)
-#         down_value = max([labels.get(label, 0) for label in ["down", "bottom_position"]], default=0)
-        
-#         # Track rep counting logic
-#         if down_value > self.down_threshold and not self.in_rep:
-#             self.in_rep = True
-#         elif down_value < self.rep_threshold and self.in_rep:
-#             self.in_rep = False
-#             self.repetitions += 1
-            
-#         # Store metrics
-#         self.form_values.append(form_value)
-#         self.depth_values.append(down_value)
-        
-#         return form_value, down_value
-        
-#     def get_metrics(self):
-#         """Calculate and return movement metrics"""
-#         if not self.form_values:
-#             return None
-            
-#         form_avg = np.mean(self.form_values) if self.form_values else 0
-#         form_std = np.std(self.form_values) if len(self.form_values) > 1 else 0
-        
-#         depth_avg = np.mean(self.depth_values) if self.depth_values else 0
-#         depth_std = np.std(self.depth_values) if len(self.depth_values) > 1 else 0
-        
-#         # Calculate quality scores
-#         form_quality = min(10, form_avg * 10)
-#         depth_quality = min(10, depth_avg * 10)
-        
-#         # Calculate consistency scores (lower std = better consistency)
-#         form_consistency = min(10, (1 - form_std) * 10)
-#         depth_consistency = min(10, (1 - depth_std) * 10)
-        
-#         # Overall score
-#         overall_score = int(round((form_quality + depth_quality + 
-#                                    form_consistency + depth_consistency) / 4))
-        
-#         return {
-#             "repetitions": self.repetitions,
-#             "form_metrics": {
-#                 "average": form_avg,
-#                 "std_dev": form_std
-#             },
-#             "depth_metrics": {
-#                 "average": depth_avg,
-#                 "std_dev": depth_std
-#             },
-#             "movement_assessment": {
-#                 "form_quality": round(form_quality, 1),
-#                 "depth_quality": round(depth_quality, 1),
-#                 "form_consistency": round(form_consistency, 1),
-#                 "depth_consistency": round(depth_consistency, 1),
-#                 "score": overall_score
-#             }
-#         }
-# app/models/analyzer.py
-import numpy as np
+from __future__ import annotations
+
 import math
+from typing import Any
+
+import numpy as np
+
+
+# COCO keypoint indexes produced by the YOLO pose checkpoints.
+LEFT_SIDE = (5, 11, 13, 15)  # shoulder, hip, knee, ankle
+RIGHT_SIDE = (6, 12, 14, 16)
+CORE_KEYPOINTS = (5, 6, 11, 12, 13, 14, 15, 16)
+
+
+def _clip(value: float, minimum: float = 0.0, maximum: float = 1.0) -> float:
+    return float(max(minimum, min(maximum, value)))
+
+
+def _angle(first: np.ndarray, center: np.ndarray, last: np.ndarray) -> float | None:
+    """Return the smaller angle between three points in degrees."""
+    first_vector = first - center
+    last_vector = last - center
+    denominator = float(np.linalg.norm(first_vector) * np.linalg.norm(last_vector))
+    if denominator <= 1e-6:
+        return None
+    cosine = float(np.dot(first_vector, last_vector) / denominator)
+    return math.degrees(math.acos(max(-1.0, min(1.0, cosine))))
+
+
+def _moving_median(values: list[float], window: int = 5) -> np.ndarray:
+    source = np.asarray(values, dtype=float)
+    if len(source) < 3:
+        return source
+
+    radius = max(1, window // 2)
+    return np.asarray(
+        [
+            np.median(source[max(0, index - radius) : index + radius + 1])
+            for index in range(len(source))
+        ],
+        dtype=float,
+    )
+
+
 class MovementAnalyzer:
-    def __init__(self, exercise_type):
+    """Turn YOLO pose keypoints into form, depth, and repetition metrics.
+
+    The checkpoints classify movement phases (``down``, ``ibw``, ``up``).
+    Their class probability is not a form score. Older code treated that
+    probability as form quality and required two different phase classes in
+    the same clip, which caused clear out-of-domain videos to return 0/10.
+    This analyzer instead uses the checkpoint's body keypoints and derives the
+    movement phase from joint geometry.
+    """
+
+    def __init__(self, exercise_type: str):
         self.exercise_type = exercise_type
-        self.form_scores = []  # ibw for regular/squat, up for others
-        self.down_scores = []
-        self.rep_count = 0
-        
-        # Rep counting parameters
-        self.form_values = []  # Store recent form values for smoothing
-        self.window_size = 5   # Number of frames to use for smoothing
-        self.rep_threshold = 0.89  # Threshold for rep detection
-        self.min_frames_between_reps = 10  # Minimum frames between reps to prevent double counting
-        self.frames_since_last_rep = 0
-        self.in_rep_motion = False
-        self.rep_start_threshold = 0.85  # Start of rep threshold
-        self.rep_end_threshold = 0.92    # End of rep threshold
-        self.min_rep_frames = 5  # Minimum frames a rep motion should take
-        self.current_rep_frames = 0
+        self.form_scores: list[float] = []
+        self.phase_values: list[float] = []
+        self.total_frames_seen = 0
+        self.pose_frames = 0
 
-    def smooth_value(self, value):
-        """Apply moving average smoothing to reduce noise"""
-        self.form_values.append(value if value is not None else self.form_values[-1] if self.form_values else 0)
-        if len(self.form_values) > self.window_size:
-            self.form_values.pop(0)
-        return sum(self.form_values) / len(self.form_values)
+    @property
+    def _is_squat(self) -> bool:
+        return self.exercise_type in {"squat", "front_squat", "zercher_squat"}
 
-    def detect_rep(self, smoothed_value):
-        """Detect repetition using state machine approach"""
-        self.frames_since_last_rep += 1
-        
-        if smoothed_value is None:
-            return
-        
-        # Update rep detection state
-        if not self.in_rep_motion:
-            # Looking for the start of a rep
-            if (smoothed_value < self.rep_start_threshold and 
-                self.frames_since_last_rep > self.min_frames_between_reps):
-                self.in_rep_motion = True
-                self.current_rep_frames = 1
-        else:
-            # In the middle of a rep motion
-            self.current_rep_frames += 1
-            
-            # Check for rep completion
-            if (smoothed_value > self.rep_end_threshold and 
-                self.current_rep_frames >= self.min_rep_frames):
-                self.rep_count += 1
-                self.frames_since_last_rep = 0
-                self.in_rep_motion = False
-                self.current_rep_frames = 0
-            
-            # Reset if rep takes too long
-            elif self.current_rep_frames > self.min_frames_between_reps * 2:
-                self.in_rep_motion = False
-                self.current_rep_frames = 0
-
-    def process_frame(self, labels):
-        """Process a single frame's labels and update metrics"""
-        # Get appropriate form value based on exercise type
-        if self.exercise_type in ['regular_deadlift', 'squat']:
-            form_value = labels.get('ibw', None)
-        else:
-            form_value = labels.get('up', None)
-        
-        down_value = labels.get('down', None)
-
-        # Update scores
-        if form_value is not None:
-            self.form_scores.append(form_value)
-        if down_value is not None:
-            self.down_scores.append(down_value)
-
-        # Apply smoothing and detect reps
-        smoothed_value = self.smooth_value(form_value)
-        self.detect_rep(smoothed_value)
-        
-        return form_value, down_value
-
-    def get_metrics(self):
-        """Calculate and return movement metrics"""
-        if not self.form_scores or not self.down_scores:
+    def _pose_measurements(
+        self,
+        keypoints: Any,
+        keypoint_scores: Any,
+        frame_shape: tuple[int, ...] | None,
+    ) -> tuple[float, float] | None:
+        points = np.asarray(keypoints, dtype=float)
+        scores = np.asarray(keypoint_scores, dtype=float).reshape(-1)
+        if points.ndim != 2 or points.shape[0] < 17 or points.shape[1] < 2:
+            return None
+        if scores.shape[0] < 17:
             return None
 
-        metrics = {
-            'frames_analyzed': len(self.form_scores),
-            'repetitions': self.rep_count,
-            'form_metrics': {
-                'average': np.mean(self.form_scores),
-                'min': min(self.form_scores),
-                'max': max(self.form_scores),
-                'consistency': 1 - (max(self.form_scores) - min(self.form_scores))
+        side = max(
+            (LEFT_SIDE, RIGHT_SIDE),
+            key=lambda indexes: float(np.mean(scores[list(indexes)])),
+        )
+        shoulder, hip, knee, ankle = side
+        side_scores = scores[list(side)]
+        visible_side = side_scores >= 0.15
+        if int(np.count_nonzero(visible_side)) < 3 or float(np.mean(side_scores)) < 0.20:
+            return None
+
+        knee_angle = _angle(points[hip], points[knee], points[ankle])
+        hip_angle = _angle(points[shoulder], points[hip], points[knee])
+        if knee_angle is None or hip_angle is None:
+            return None
+
+        torso_vector = points[shoulder] - points[hip]
+        torso_angle = abs(
+            math.degrees(math.atan2(float(torso_vector[1]), float(torso_vector[0])))
+        )
+        torso_angle = min(torso_angle, 180.0 - torso_angle)
+
+        # Reject obviously collapsed skeletons while retaining side-on poses,
+        # where the left and right joints naturally overlap.
+        height, width = (frame_shape or (1, 1))[:2]
+        frame_diagonal = max(1.0, math.hypot(float(width), float(height)))
+        segment_lengths = [
+            float(np.linalg.norm(points[shoulder] - points[hip])),
+            float(np.linalg.norm(points[hip] - points[knee])),
+            float(np.linalg.norm(points[knee] - points[ankle])),
+        ]
+        usable_segments = sum(length >= frame_diagonal * 0.015 for length in segment_lengths)
+        if usable_segments < 2:
+            return None
+
+        core_scores = scores[list(CORE_KEYPOINTS)]
+        coverage = float(np.mean(core_scores >= 0.15))
+        side_confidence = float(np.mean(side_scores))
+        geometry_quality = usable_segments / len(segment_lengths)
+
+        # Confidence indicates how reliably the body joints were localized.
+        # Rescale it because pose confidences around 0.5-0.8 are normal even
+        # for clear real-world footage outside the training set.
+        localization_quality = _clip((side_confidence - 0.15) / 0.70)
+        form_quality = _clip(
+            0.45
+            + 0.35 * localization_quality
+            + 0.12 * coverage
+            + 0.08 * geometry_quality
+        )
+
+        knee_extension = _clip((knee_angle - 70.0) / 110.0)
+        hip_extension = _clip((hip_angle - 70.0) / 110.0)
+        torso_extension = _clip((torso_angle - 20.0) / 70.0)
+
+        if self._is_squat:
+            phase = (
+                0.50 * knee_extension
+                + 0.30 * hip_extension
+                + 0.20 * torso_extension
+            )
+        else:
+            phase = (
+                0.25 * knee_extension
+                + 0.35 * hip_extension
+                + 0.40 * torso_extension
+            )
+
+        return form_quality, _clip(phase)
+
+    def _legacy_measurements(self, labels: dict[str, float]) -> tuple[float, float] | None:
+        """Use phase labels only when a checkpoint does not expose keypoints."""
+        if not labels:
+            return None
+
+        label, confidence = max(labels.items(), key=lambda item: item[1])
+        confidence = _clip(float(confidence))
+        if confidence < 0.05:
+            return None
+
+        phases = {"down": 0.0, "bottom_position": 0.0, "ibw": 0.5, "up": 1.0}
+        phase = phases.get(label)
+        if phase is None:
+            return None
+
+        # This fallback measures tracking quality, not biomechanical form.
+        tracking_quality = _clip(0.45 + confidence * 0.55)
+        return tracking_quality, phase
+
+    def process_frame(
+        self,
+        labels: dict[str, float],
+        *,
+        keypoints: Any = None,
+        keypoint_scores: Any = None,
+        frame_shape: tuple[int, ...] | None = None,
+    ) -> tuple[float | None, float | None]:
+        """Process one frame and return form quality and movement phase."""
+        self.total_frames_seen += 1
+        measurements = None
+        if keypoints is not None and keypoint_scores is not None:
+            measurements = self._pose_measurements(
+                keypoints,
+                keypoint_scores,
+                frame_shape,
+            )
+            if measurements is not None:
+                self.pose_frames += 1
+
+        if measurements is None:
+            measurements = self._legacy_measurements(labels)
+        if measurements is None:
+            return None, None
+
+        form_quality, phase = measurements
+        self.form_scores.append(form_quality)
+        self.phase_values.append(phase)
+        return form_quality, phase
+
+    def _count_repetitions(self, smoothed_phases: np.ndarray) -> int:
+        if len(smoothed_phases) < 8:
+            return 0
+
+        bottom = float(np.quantile(smoothed_phases, 0.05))
+        top = float(np.quantile(smoothed_phases, 0.90))
+        movement_range = top - bottom
+        if movement_range < 0.14:
+            return 0
+
+        down_threshold = bottom + movement_range * 0.30
+        up_threshold = bottom + movement_range * 0.70
+        in_bottom = False
+        down_streak = 0
+        up_streak = 0
+        repetitions = 0
+
+        for phase in smoothed_phases:
+            if not in_bottom:
+                down_streak = down_streak + 1 if phase <= down_threshold else 0
+                if down_streak >= 2:
+                    in_bottom = True
+                    down_streak = 0
+            else:
+                up_streak = up_streak + 1 if phase >= up_threshold else 0
+                if up_streak >= 2:
+                    repetitions += 1
+                    in_bottom = False
+                    up_streak = 0
+
+        return repetitions
+
+    def get_metrics(self) -> dict[str, Any] | None:
+        """Calculate aggregate workout metrics."""
+        if not self.form_scores or not self.phase_values:
+            return None
+
+        form = np.asarray(self.form_scores, dtype=float)
+        phases = _moving_median(self.phase_values)
+        phase_bottom = float(np.quantile(phases, 0.05))
+        phase_top = float(np.quantile(phases, 0.95))
+        movement_range = max(0.0, phase_top - phase_bottom)
+
+        expected_range = 0.42 if self._is_squat else 0.35
+        depth_quality = _clip((movement_range - 0.06) / (expected_range - 0.06))
+        form_consistency = _clip(1.0 - float(np.std(form)) * 1.75)
+        phase_differences = np.diff(phases)
+        depth_consistency = _clip(
+            1.0 - (float(np.std(phase_differences)) * 3.5 if len(phase_differences) else 0.0)
+        )
+
+        form_average = float(np.mean(form))
+        overall_score = (
+            form_average * 0.50
+            + depth_quality * 0.30
+            + form_consistency * 0.10
+            + depth_consistency * 0.10
+        ) * 10.0
+
+        return {
+            "frames_analyzed": len(self.form_scores),
+            "frames_seen": self.total_frames_seen,
+            "pose_frames": self.pose_frames,
+            "repetitions": self._count_repetitions(phases),
+            "form_metrics": {
+                "average": round(form_average, 4),
+                "min": round(float(np.min(form)), 4),
+                "max": round(float(np.max(form)), 4),
+                "consistency": round(form_consistency, 4),
             },
-            'depth_metrics': {
-                'average': np.mean(self.down_scores),
-                'min': min(self.down_scores),
-                'max': max(self.down_scores),
-                'consistency': 1 - (max(self.down_scores) - min(self.down_scores))
-            }
+            "depth_metrics": {
+                "average": round(depth_quality, 4),
+                "min": round(phase_bottom, 4),
+                "max": round(phase_top, 4),
+                "range": round(movement_range, 4),
+                "consistency": round(depth_consistency, 4),
+            },
+            "movement_assessment": {
+                "form_quality": self.get_quality_assessment(form_average),
+                "depth_quality": self.get_quality_assessment(depth_quality),
+                "form_consistency": self.get_quality_assessment(form_consistency),
+                "depth_consistency": self.get_quality_assessment(depth_consistency),
+                "score": round(overall_score, 1),
+            },
         }
-
-        # Calculate overall score out of 10
-        form_component = metrics['form_metrics']['average'] * 0.6
-        depth_component = metrics['depth_metrics']['average'] * 0.4
-        overall_score = (form_component + depth_component) * 10
-
-        metrics['movement_assessment'] = {
-            'form_quality': self.get_quality_assessment(metrics['form_metrics']['average']),
-            'depth_quality': self.get_quality_assessment(metrics['depth_metrics']['average']),
-            'form_consistency': self.get_quality_assessment(metrics['form_metrics']['consistency']),
-            'depth_consistency': self.get_quality_assessment(metrics['depth_metrics']['consistency']),
-            'score': round(overall_score, 1)
-        }
-
-        return metrics
 
     @staticmethod
-    def get_quality_assessment(value):
-        """Return a qualitative assessment based on the metric value"""
-        if value >= 0.9:
-            return math.ceil(value*10)
-        elif value >= 0.8:
-            return math.ceil(value*10)
-        elif value >= 0.7:
-            return math.ceil(value*10)
-        elif value >= 0.6:
-            return math.ceil(value*10)
-        else:
-            return math.ceil(value*10)
+    def get_quality_assessment(value: float) -> int:
+        return int(round(_clip(float(value)) * 10))

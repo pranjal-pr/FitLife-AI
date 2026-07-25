@@ -90,6 +90,9 @@ class VideoProcessingTests(unittest.TestCase):
                 'stream': True,
                 'verbose': False,
                 'device': 0,
+                'conf': 0.01,
+                'iou': 0.5,
+                'max_det': 3,
             },
         )
         self.assertEqual(len(writer.frames), 1)
